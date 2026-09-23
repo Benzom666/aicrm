@@ -1,0 +1,69 @@
+services:
+  - type: web
+    name: aicrm-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: ALLOWED_SIGN_IN
+        value: malik666arman@gmail.com
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: API_URL
+        value: https://aicrm-app-self.vercel.app
+      - key: APP_URL
+        value: https://aicrm-app-self.vercel.app
+      - key: AGENT_URL
+        value: https://aicrm-agent.onrender.com
+      - key: AGENT_BRIDGE_SECRET
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+      - key: AI_GATEWAY_API_KEY
+        sync: false
+      - key: NVIDIA_NIM_API_KEY
+        sync: false
+
+  - type: web
+    name: aicrm-agent
+    runtime: docker
+    dockerfilePath: ./apps/agent/Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /eve/v1/health
+    disk:
+      name: eve-workflow-data
+      mountPath: /app/apps/agent/.eve/.workflow-data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: AGENT_BRIDGE_SECRET
+        sync: false
+      - key: NVIDIA_NIM_API_KEY
+        sync: false
+      - key: AI_GATEWAY_API_KEY
+        sync: false
+
+  - type: cron
+    name: aicrm-mailbox-sync
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    schedule: "*/5 * * * *"
+    plan: starter
+    command: >-
+      curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://aicrm-api.onrender.com/internal/sync/mailboxes
+    envVars:
+      - key: CRON_SECRET
+        sync: false

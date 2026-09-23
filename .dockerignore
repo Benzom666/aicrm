@@ -1,0 +1,11 @@
+node_modules
+.git
+.next
+.turbo
+.eve
+.vercel
+.output
+dist
+*.log
+.env
+.env.*
