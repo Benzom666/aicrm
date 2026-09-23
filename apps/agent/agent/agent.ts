@@ -15,7 +15,7 @@ void syncVersion();
 export default defineAgent({
 	model: defineDynamic({
 		fallback: DEFAULT_AGENT_MODEL.id,
-		events: { "session.started": () => selectedModel() },
+		events: { "step.started": () => selectedModel() },
 	}),
 	limits: {
 		maxInputTokensPerSession: 500_000,

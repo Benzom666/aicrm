@@ -125,6 +125,20 @@ export class EnvironmentVariables {
 
 	@IsOptional()
 	@IsString()
+	NVIDIA_NIM_API_KEY?: string;
+
+	@IsOptional()
+	@IsUrl(
+		{ require_tld: false, require_protocol: true },
+		{
+			message:
+				"NVIDIA_NIM_BASE_URL must be a full URL with a scheme, like https://integrate.api.nvidia.com/v1.",
+		},
+	)
+	NVIDIA_NIM_BASE_URL?: string;
+
+	@IsOptional()
+	@IsString()
 	CRM_TELEMETRY_DISABLED?: string;
 }
 

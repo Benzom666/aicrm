@@ -2,6 +2,8 @@ import { db } from "@crm/db";
 import { DEFAULT_AGENT_MODEL } from "@crm/db/settings";
 import { defineAgent, defineDynamic } from "eve";
 import { z } from "zod";
+import type { ModelSelection } from "../../lib/model";
+import { nimConfigFromEnv, resolveModelTarget } from "../../lib/nim";
 import { attribute, purposeOf } from "../../lib/session-purpose";
 
 export default defineAgent({
@@ -10,7 +12,10 @@ export default defineAgent({
 	model: defineDynamic({
 		fallback: DEFAULT_AGENT_MODEL.id,
 		events: {
-			"session.started": async (_event, ctx) => {
+			"session.started": async (
+				_event,
+				ctx,
+			): Promise<ModelSelection | null> => {
 				if (purposeOf(ctx) !== "team-agent") return null;
 				const runId = attribute(ctx, "runId");
 				if (!runId) return null;
@@ -23,9 +28,17 @@ export default defineAgent({
 						},
 					},
 				});
-				return run
+				if (!run) return null;
+				const target = resolveModelTarget(
+					{
+						id: run.version.modelId,
+						contextWindowTokens: run.version.modelContextWindowTokens,
+					},
+					nimConfigFromEnv(process.env),
+				);
+				return target
 					? {
-							model: run.version.modelId,
+							model: target,
 							modelContextWindowTokens: run.version.modelContextWindowTokens,
 						}
 					: null;

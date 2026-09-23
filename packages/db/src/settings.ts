@@ -52,6 +52,79 @@ export async function writeAgentModel(
 	});
 }
 
+export const NIM_MODEL_PREFIX = "nim/";
+
+export const NIM_PROVIDER = "NVIDIA NIM";
+
+export const NIM_DEFAULT_BASE_URL = "https://integrate.api.nvidia.com/v1";
+
+export const NIM_MODELS = [
+	{
+		id: "mistralai/mistral-large-2-instruct",
+		name: "Mistral Large 2",
+		contextWindowTokens: 128_000,
+	},
+	{
+		id: "nvidia/llama-3.1-nemotron-70b-instruct",
+		name: "Llama Nemotron 70B",
+		contextWindowTokens: 128_000,
+	},
+	{
+		id: "openai/gpt-oss-20b",
+		name: "GPT-OSS 20B",
+		contextWindowTokens: 128_000,
+	},
+	{
+		id: "moonshotai/kimi-k2.6",
+		name: "Kimi K2.6",
+		contextWindowTokens: 256_000,
+	},
+	{
+		id: "mistralai/mixtral-8x22b-v0.1",
+		name: "Mixtral 8x22B",
+		contextWindowTokens: 64_000,
+	},
+	{
+		id: "nvidia/nemotron-3.5-lightning-30b-a3b",
+		name: "Nemotron 3.5 Lightning",
+		contextWindowTokens: 256_000,
+	},
+] as const;
+
+export type NimModel = (typeof NIM_MODELS)[number];
+
+export function isNimModelId(id: string): boolean {
+	return id.startsWith(NIM_MODEL_PREFIX);
+}
+
+export function nimModelSuffix(id: string): string {
+	return isNimModelId(id) ? id.slice(NIM_MODEL_PREFIX.length) : id;
+}
+
+export function findNimModel(suffix: string): NimModel | null {
+	return NIM_MODELS.find((model) => model.id === suffix) ?? null;
+}
+
+export function parseNimKeys(raw: string | undefined): string[] {
+	if (!raw) return [];
+	const seen = new Set<string>();
+	for (const part of raw.split(",")) {
+		const key = part.trim();
+		if (key && !seen.has(key)) seen.add(key);
+	}
+	return [...seen];
+}
+
+export function resolveNimBaseUrl(raw: string | undefined): string {
+	const trimmed = raw?.trim();
+	if (!trimmed) return NIM_DEFAULT_BASE_URL;
+	try {
+		return new URL(trimmed).toString().replace(/\/+$/, "");
+	} catch {
+		return NIM_DEFAULT_BASE_URL;
+	}
+}
+
 export const CONTEXT_DEV_SIGNUP_URL = "https://link.context.dev/crm";
 
 export const CONTEXT_DEV_DISCOUNT_CODE = "CRM";

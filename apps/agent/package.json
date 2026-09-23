@@ -19,10 +19,12 @@
 		"clean": "rm -rf .turbo .eve node_modules"
 	},
 	"dependencies": {
+		"@ai-sdk/openai-compatible": "3.0.20",
 		"@crm/db": "workspace:*",
 		"@crm/env": "workspace:*",
 		"@crm/telemetry": "workspace:*",
 		"@crm/validation": "workspace:*",
+		"ai": "^7.0.38",
 		"context.dev": "2.10.0",
 		"eve": "^0.29.4",
 		"zod": "^4.4.3"

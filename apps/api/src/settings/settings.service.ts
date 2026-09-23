@@ -2,6 +2,7 @@ import type { Db } from "@crm/db";
 import {
 	DEFAULT_AGENT_MODEL,
 	maskKey,
+	parseNimKeys,
 	readAgentModel,
 	readArchiveRetentionDays,
 	readContextDevKey,
@@ -54,11 +55,16 @@ export class SettingsService {
 			return this.agentModel();
 		}
 
+		const nimConfigured =
+			parseNimKeys(process.env.NVIDIA_NIM_API_KEY).length > 0;
+
 		const models = await this.catalog.models();
 
 		if (!models) {
 			throw new BadRequestException(
-				"Could not reach the AI Gateway to check that model. Try again in a moment.",
+				nimConfigured
+					? "Could not reach the AI Gateway or NVIDIA NIM to check that model. Try again in a moment."
+					: "Could not reach the AI Gateway to check that model. Try again in a moment.",
 			);
 		}
 
@@ -66,7 +72,9 @@ export class SettingsService {
 
 		if (!chosen) {
 			throw new BadRequestException(
-				`The AI Gateway does not serve a tool-using model called "${modelId}".`,
+				nimConfigured
+					? `Neither the AI Gateway nor NVIDIA NIM serves a tool-using model called "${modelId}".`
+					: `The AI Gateway does not serve a tool-using model called "${modelId}".`,
 			);
 		}
 

@@ -14,13 +14,26 @@ are in `docs/setup.md`.
 Default `zai/glm-5.2-fast`; `DEFAULT_AGENT_MODEL` in `@crm/db/settings` because the
 agent and the API both need it.
 
-- **A row (`AppSetting`), not an env var**, via `defineDynamic` on `session.started`.
+- **A row (`AppSetting`), not an env var**, via `defineDynamic` on `step.started`.
+  Session and turn scopes only accept model id strings; a live provider object
+  survives only at step scope, so the resolver runs before every model call.
   Open conversations keep their model — prompt caches are per model.
 - **`lib/model.ts` always sends `modelContextWindowTokens`**; eve never inherits it.
 - **A failed read logs and keeps the compiled fallback.** Never throws.
 - **The chooser offers only `tool-use` models** (`ModelCatalogService`).
 - **Not a frontier model, deliberately** — refusing wrong answers is enforced by the
   tools and evidence model, not model strength.
+
+Direct provider models bypass the Gateway entirely. A stored id starting with
+`nim/` resolves to NVIDIA NIM through an OpenAI-compatible client, billed to
+`NVIDIA_NIM_API_KEY` instead of Gateway credits. The picker lists the table in
+`NIM_MODELS` (`@crm/db/settings`, the one place that names NIM models) minus
+whatever the live NIM model list does not serve to that key. Without the key
+the section is absent and a stored `nim/` id falls back to the Gateway default
+with an error in the agent log. `agent/lib/nim.ts` owns the resolution; the API
+only lists, it never calls NIM. Separate several keys with commas and requests
+rotate across them, skipping a key that answers throttled or rejected until its
+limit resets.
 
 ## Pictures are copied, never linked
 

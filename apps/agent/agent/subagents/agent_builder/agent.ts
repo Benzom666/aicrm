@@ -8,7 +8,7 @@ export default defineAgent({
 		"Turn one private CRM builder-chat request into a validated, reviewable team-agent version without deploying it.",
 	model: defineDynamic({
 		fallback: DEFAULT_AGENT_MODEL.id,
-		events: { "session.started": () => selectedModel() },
+		events: { "step.started": () => selectedModel() },
 	}),
 	outputSchema: z.object({
 		status: z.literal("draft_ready"),

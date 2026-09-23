@@ -1,8 +1,10 @@
 import { db } from "@crm/db";
 import { readAgentModel } from "@crm/db/settings";
+import type { LanguageModel } from "ai";
+import { nimConfigFromEnv, resolveModelTarget } from "./nim";
 
 export interface ModelSelection {
-	model: string;
+	model: string | LanguageModel;
 	modelContextWindowTokens: number;
 }
 
@@ -12,8 +14,15 @@ export async function selectedModel(): Promise<ModelSelection | null> {
 
 		if (setting.isDefault) return null;
 
+		const target = resolveModelTarget(
+			{ id: setting.id, contextWindowTokens: setting.contextWindowTokens },
+			nimConfigFromEnv(process.env),
+		);
+
+		if (!target) return null;
+
 		return {
-			model: setting.id,
+			model: target,
 			modelContextWindowTokens: setting.contextWindowTokens,
 		};
 	} catch (error) {
