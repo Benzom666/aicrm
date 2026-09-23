@@ -8,6 +8,8 @@ const apiUrl =
 	process.env.NEXT_PUBLIC_API_URL ??
 	"http://localhost:3001";
 
+const internalApiUrl = process.env.API_INTERNAL_URL ?? "";
+
 const allowedDevOrigins = (process.env.APP_URL ?? "")
 	.split(",")
 	.flatMap((origin) => {
@@ -37,6 +39,16 @@ const nextConfig: NextConfig = {
 
 	cacheComponents: true,
 	partialPrefetching: true,
+
+	async rewrites() {
+		if (!internalApiUrl) return [];
+		return [
+			{
+				source: "/api/:path*",
+				destination: `${internalApiUrl}/api/:path*`,
+			},
+		];
+	},
 };
 
 export default nextConfig;
